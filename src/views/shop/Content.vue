@@ -15,9 +15,9 @@
           </p>
         </div>
         <div class="product__number">
-          <span class="product__number__minus">-</span>
-          {{cartList?.[shopId]?.[item._id]?.count || 0}}
-          <span class="product__number__plus" @click="()=>{addItemToCart(shopId, item._id, item)}">+</span>
+          <span class="product__number__minus" @click="()=>{changeCartItem(shopId, item._id, item, -1, shopName)}">-</span>
+          {{cartList?.[shopId]?.productList?.[item._id]?.count || 0}}
+          <span class="product__number__plus" @click="()=>{changeCartItem(shopId, item._id, item, 1, shopName)}">+</span>
         </div>
       </div>
     </div>
@@ -26,10 +26,11 @@
 
 <script>
 import { useRoute } from 'vue-router'
-import { reactive, ref, toRefs } from '@vue/reactivity'
 import { useStore } from 'vuex'
-import { get } from '@/utils/request'
+import { reactive, ref, toRefs } from '@vue/reactivity'
 import { watchEffect } from '@vue/runtime-core'
+import { get } from '@/utils/request'
+import { useCommonCartEffect } from './commonCartEffect'
 const categories = [
   { name: '全部商品', tab: 'all' },
   { name: '秒杀', tab: 'seckill' },
@@ -65,25 +66,27 @@ const useCurrentListEffect = (currentTab, shopId) => {
   return { list }
 }
 
-const useCartEffect = () => {
-  const store = useStore()
-  const { cartList } = toRefs(store.state)
-  const addItemToCart = (shopId, productId, productInfo) => {
-    store.commit('addItemToCart', { shopId, productId, productInfo })
-  }
-  return { cartList, addItemToCart }
-}
-
 export default {
   name: 'Content',
 
-  setup () {
+  props: ['shopName'],
+
+  setup (props) {
+    console.log(props)
     const route = useRoute()
+    const store = useStore()
     const shopId = route.params.id
     const { currentTab, handleTabClick } = useTabEffect()
     const { list } = useCurrentListEffect(currentTab, shopId)
-    const { cartList, addItemToCart } = useCartEffect()
-    return { categories, list, currentTab, handleTabClick, cartList, shopId, addItemToCart }
+    const { cartList, changeCartItemInfo } = useCommonCartEffect()
+    const changeShopName = (shopId, shopName) => {
+      store.commit('changeShopName', { shopId, shopName })
+    }
+    const changeCartItem = (shopId, productId, productInfo, num, shopName) => {
+      changeCartItemInfo(shopId, productId, productInfo, num)
+      changeShopName(shopId, shopName)
+    }
+    return { categories, list, currentTab, handleTabClick, cartList, shopId, changeCartItem }
   }
 }
 </script>
@@ -121,7 +124,7 @@ export default {
       display: flex;
       padding: .12rem 0;
       margin: 0 .16rem;
-      border-bottom: 1px solid #f1f1f1;
+      border-bottom: 1px solid $content-bgColor;
       &__img{
         width: 0.68rem;
         height: 0.68rem;
