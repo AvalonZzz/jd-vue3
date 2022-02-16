@@ -27,6 +27,16 @@ const routes = [
     path: '/shop/:id',
     name: 'Shop',
     component: import(/* w ebpackChunkName: "shop" */ '../views/shop/Shop.vue')
+  },
+  {
+    path: '/cartList',
+    name: 'CartList',
+    component: import(/* w ebpackChunkName: "cartList" */ '../views/cartList/CartList.vue')
+  },
+  {
+    path: '/orderConfirmation/:id',
+    name: 'OrderConfirmation',
+    component: import(/* w ebpackChunkName: "orderConfirmation" */ '../views/orderConfirmation/OrderConfirmation.vue')
   }
   // {
   //   path: '/about',

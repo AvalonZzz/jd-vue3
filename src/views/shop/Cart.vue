@@ -1,9 +1,9 @@
 <template>
-  <div class="mask" v-if="showCart" @click="handleCartShowChange"></div>
+  <div class="mask" v-if="showCart && calculations.total > 0" @click="handleCartShowChange"></div>
   <div class="cart">
-    <div class="product" v-if="showCart">
+    <div class="product" v-if="showCart && calculations.total > 0">
       <div class="product__header">
-        <div class="product__header__all"><span class="product__header__icon iconfont" v-html="allChecked ? '&#xe652;' :  '&#xe619;'" @click="setCartItemsChecked(shopId)"></span>全选</div>
+        <div class="product__header__all"><span class="product__header__icon iconfont" v-html="calculations.allChecked ? '&#xe652;' :  '&#xe619;'" @click="setCartItemsChecked(shopId)"></span>全选</div>
         <div class="product__header__clear"><span @click="cleanCartProducts(shopId)">清空购物车</span></div>
       </div>
       <template v-for="(item) in productList" :key="item._id">
@@ -28,11 +28,11 @@
     <div class="check">
       <div class="check__icon" @click="handleCartShowChange">
         <img class="check__icon__img" src="http://www.dell-lee.com/imgs/vue3/near.png" alt="">
-        <div class="check__icon__tag">{{count}}</div>
+        <div class="check__icon__tag">{{calculations.total}}</div>
       </div>
-      <div class="check__info">总计：<span class="check__info__price">&yen; {{price}}</span></div>
+      <div class="check__info">总计：<span class="check__info__price">&yen; {{calculations.price}}</span></div>
       <div class="check__btn" >
-        <router-link :to="{name: 'Home'}">
+        <router-link :to="{path: `/OrderConfirmation/${shopId}`}">
           去结算
         </router-link>
       </div>
@@ -44,50 +44,27 @@
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import { useCommonCartEffect } from './commonCartEffect'
+import { useCommonCartEffect } from '@/effects/cartEffects.js'
 const useCartEffect = (shopId) => {
   const store = useStore()
   const cartList = store.state.cartList
-  const count = computed(() => {
+  const calculations = computed(() => {
     const productList = cartList[shopId]?.productList
-    let count = 0
+    const result = { total: 0, price: 0, allChecked: true }
     if (productList) {
       for (const i in productList) {
         const product = productList[i]
-        count += product.count
-      }
-    }
-    return count
-  })
-  const price = computed(() => {
-    const productList = cartList[shopId]?.productList
-    let price = 0
-    if (productList) {
-      for (const i in productList) {
-        const product = productList[i]
+        result.total += product.count
         if (product.check) {
-          price += (product.count * product.price)
+          result.price += (product.count * product.price)
         }
-      }
-    }
-    return price.toFixed(2)
-  })
-  const allChecked = computed(() => {
-    const productList = cartList[shopId]?.productList
-    let result = true
-    if (productList) {
-      for (const i in productList) {
-        const product = productList[i]
         if (product.count > 0 && !product.check) {
-          result = false
+          result.allChecked = false
         }
       }
     }
+    result.price = result.price.toFixed(2)
     return result
-  })
-  const productList = computed(() => {
-    const productList = cartList[shopId]?.productList || []
-    return productList
   })
 
   const changeCartItemCheck = (shopId, productId) => {
@@ -102,8 +79,8 @@ const useCartEffect = (shopId) => {
     store.commit('setCartItemsChecked', { shopId })
   }
 
-  const { changeCartItemInfo } = useCommonCartEffect()
-  return { count, price, productList, allChecked, changeCartItemInfo, changeCartItemCheck, cleanCartProducts, setCartItemsChecked }
+  const { changeCartItemInfo, productList } = useCommonCartEffect(shopId)
+  return { calculations, productList, changeCartItemInfo, changeCartItemCheck, cleanCartProducts, setCartItemsChecked }
 }
 
 const toggleCartEffect = () => {
@@ -119,8 +96,8 @@ export default {
     const route = useRoute()
     const shopId = route.params.id
     const { showCart, handleCartShowChange } = toggleCartEffect()
-    const { count, price, productList, allChecked, changeCartItemInfo, changeCartItemCheck, cleanCartProducts, setCartItemsChecked } = useCartEffect(shopId)
-    return { count, price, productList, allChecked, shopId, changeCartItemInfo, changeCartItemCheck, cleanCartProducts, setCartItemsChecked, showCart, handleCartShowChange }
+    const { calculations, productList, changeCartItemInfo, changeCartItemCheck, cleanCartProducts, setCartItemsChecked } = useCartEffect(shopId)
+    return { calculations, productList, shopId, changeCartItemInfo, changeCartItemCheck, cleanCartProducts, setCartItemsChecked, showCart, handleCartShowChange }
   }
 }
 </script>
