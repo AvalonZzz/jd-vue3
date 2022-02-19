@@ -37,6 +37,11 @@ const routes = [
     path: '/orderConfirmation/:id',
     name: 'OrderConfirmation',
     component: import(/* w ebpackChunkName: "orderConfirmation" */ '../views/orderConfirmation/OrderConfirmation.vue')
+  },
+  {
+    path: '/orderList',
+    name: 'OrderList',
+    component: import(/* w ebpackChunkName: "orderList" */ '../views/orderList/OrderList.vue')
   }
   // {
   //   path: '/about',

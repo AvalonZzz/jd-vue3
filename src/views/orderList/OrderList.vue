@@ -1,28 +1,25 @@
 <template>
     <div class="wrapper">
-      <StaticPart></StaticPart>
-      <Nearby></Nearby>
+      this is orderList page
     </div>
-    <Docker :currentIndex="0"></Docker>
+    <Docker :currentIndex="2"></Docker>
 </template>
 
 <script>
-import StaticPart from '@/views/home/StaticPart'
-import Nearby from '@/views/home/Nearby'
 import Docker from '@/components/Docker'
 export default {
-  name: 'Home',
+  name: 'OrderList',
+
   components: {
-    StaticPart,
-    Nearby,
     Docker
-  }
+  },
+
+  setup () {}
 }
 </script>
 
 <style lang="scss" scoped>
 @import '../../style/variables.scss';
-@import '../../style/mixins.scss';
 .wrapper{
   overflow-y: auto;
   position: absolute;
